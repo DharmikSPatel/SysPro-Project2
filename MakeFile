@@ -1,0 +1,14 @@
+CC = gcc
+CFLAGS = -g -std=c99 -Wall -fsanitize=address,undefined
+
+all: countWordsInFile
+
+countWordsInFile: countWordsInFile.o lines.o
+	$(CC) $(CFLAGS) -o $@ $^
+
+countWordsInFile.o lines.o: lines.h
+
+clean:
+	rm -f *.o countWordsInFile
+
+
