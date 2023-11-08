@@ -74,8 +74,23 @@ int isItSelfOrParrentDirOrHidden(char* name){
     }
     return 0;
 }
-
-void countWordsInFile(const char* fileName, struct Word **head) {
+int fileIsTextFile(char* fileName){
+    int len = strlen(fileName);
+    if(len >= 4){
+        //printf("%s\n", &(fileName[len - 4]));
+        if(strcmp(&(fileName[len - 4]), ".txt") == 0){
+            return 1;
+        }
+    }
+    return 0;
+}
+/**
+ * @brief The file must be check by the caller to be a .txt file
+ * 
+ * @param fileName the name of a .txt file
+ * @param head 
+ */
+void countWordsInFile(char* fileName, struct Word **head) {
     bool wordExists;
     LINES *lines = lopen(fileName);
     char *line;
@@ -167,8 +182,10 @@ void dir(const char* fullPath, int level, struct Word **head){
     int dlen = strlen(fullPath);
     struct dirent *de;
     while((de = readdir(dirp))){
+
         if(isItSelfOrParrentDirOrHidden(de->d_name))
             continue;
+
         int flen = strlen(de->d_name);
         char* fname = malloc(dlen + 1 + flen + 1);
         memcpy(fname, fullPath, dlen);
@@ -176,6 +193,7 @@ void dir(const char* fullPath, int level, struct Word **head){
         memcpy(fname + dlen + 1, de->d_name, flen + 1);
         int type = isFileOrDir(fname);
         printTabs(level);
+
         switch (type){
             case TYPE_DIR:
                 printf("DIR: %s\n", fname);
@@ -183,7 +201,8 @@ void dir(const char* fullPath, int level, struct Word **head){
                 break;
             case TYPE_FILE:
                 printf("FILE: %s\n", fname);
-                countWordsInFile(fname, head);
+                if(fileIsTextFile(fname))
+                    countWordsInFile(fname, head);
                 break;
             default:
                 printf("OTHER: %s\n", fname);
@@ -204,7 +223,7 @@ void dir(const char* fullPath, int level, struct Word **head){
  * 
  * @return int 
  */
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
     if(argc <= 0) {
         printf("please re run with args\n"); 
@@ -214,7 +233,7 @@ int main(int argc, char const *argv[])
     struct Word *head = malloc(sizeof(struct Word));
     head = NULL;
     for(int i = 1; i < argc; i++){
-        const char* fname = argv[i];
+        char* fname = argv[i];
         int type = isFileOrDir(fname);
         switch (type){
             case TYPE_DIR:
@@ -223,7 +242,8 @@ int main(int argc, char const *argv[])
                 break;
             case TYPE_FILE:
                 printf("FILE: %s\n", fname);
-                countWordsInFile(fname, &head);
+                if(fileIsTextFile(fname))
+                    countWordsInFile(fname, &head);
                 break;
             default:
                 printf("OTHER: %s\n", fname);
