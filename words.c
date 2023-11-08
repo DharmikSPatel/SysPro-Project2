@@ -3,10 +3,26 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <stdbool.h>
+#include "lines.h"
+
 
 #define TYPE_FILE 0
 #define TYPE_DIR 1
 #define TYPE_OTHER -1
+
+char** words;
+int* wordCounter;
+static int arrayPos = 0;
+
+void initializeArrays() {
+    words = malloc(sizeof(char*) * 100);
+    wordCounter = malloc(sizeof(int) * 100);
+    for (int i = 0; i < 100; i++) {
+        words[i] = NULL;
+        wordCounter[i] = 0;
+    }
+}
 
 /**
  * @brief This utility function determins if a path is a file, or dir, or neither.
@@ -52,6 +68,38 @@ int isItSelfOrParrentDirOrHidden(char* name){
     return 0;
 }
 
+void countWordsInFile(char *fileName) {
+    bool wordExists;
+    LINES *lines = lopen(fileName);
+    char *line;
+
+    while ((line = get_line(lines))) {
+        char *word = strtok(line, " \n");
+        while (word != NULL) {
+            wordExists = false;
+            printf(">>%s<<\n", word);
+            for (int i = 0; i < arrayPos; i++) {
+                if (strcmp(words[i], word) == 0) {
+                    wordCounter[i]++;
+                    wordExists = true;
+                    break;
+                }
+            }
+            if (!wordExists) {
+                words[arrayPos] = word;
+                wordCounter[arrayPos] = 1;
+                arrayPos++;
+            }
+            word = strtok(NULL, " \n");
+        }
+
+    }
+    free(line);
+    lclose(lines);
+}
+
+// void countWordsInFile(char* filename);
+
 /**
  * @brief This function recursivly opens and reads from a directory
  * 
@@ -80,6 +128,7 @@ void dir(const char* fullPath, int level){
                 break;
             case TYPE_FILE:
                 printf("FILE: %s\n", fname);
+                countWordsInFile(fname);
                 break;
             default:
                 printf("OTHER: %s\n", fname);
@@ -90,7 +139,6 @@ void dir(const char* fullPath, int level){
 
     closedir(dirp);
 }
-
 
 /**
  * @brief This the runner class. 
@@ -107,6 +155,7 @@ int main(int argc, char const *argv[])
         printf("please re run with args\n"); 
         return EXIT_FAILURE;
     }
+    initializeArrays();
     for(int i = 1; i < argc; i++){
         const char* fname = argv[i];
         int type = isFileOrDir(fname);
@@ -117,11 +166,15 @@ int main(int argc, char const *argv[])
                 break;
             case TYPE_FILE:
                 printf("FILE: %s\n", fname);
+                countWordsInFile(fname);
                 break;
             default:
                 printf("OTHER: %s\n", fname);
                 break;
         }
+    }
+    for(int i = 0; i < arrayPos; i++){
+        printf("%s: %d\n", words[i], wordCounter[i]);
     }
     return EXIT_SUCCESS;
 }
