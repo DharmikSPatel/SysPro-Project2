@@ -11,18 +11,25 @@
 #define TYPE_DIR 1
 #define TYPE_OTHER -1
 
-char** words;
-int* wordCounter;
-static int arrayPos = 0;
+// char** words;
+// int* wordCounter;
+// static int arrayPos = 0;
+// static int arraySize = 100;
 
-void initializeArrays() {
-    words = malloc(sizeof(char*) * 100);
-    wordCounter = malloc(sizeof(int) * 100);
-    for (int i = 0; i < 100; i++) {
-        words[i] = NULL;
-        wordCounter[i] = 0;
-    }
-}
+struct Word {
+    char* word;
+    int count;
+    struct Word* nextWord;
+};
+
+// void initializeArrays() {
+//     words = malloc(sizeof(char*) * 100);
+//     wordCounter = malloc(sizeof(int) * 100);
+//     for (int i = 0; i < 100; i++) {
+//         words[i] = NULL;
+//         wordCounter[i] = 0;
+//     }
+// }
 
 /**
  * @brief This utility function determins if a path is a file, or dir, or neither.
@@ -68,7 +75,7 @@ int isItSelfOrParrentDirOrHidden(char* name){
     return 0;
 }
 
-void countWordsInFile(char *fileName) {
+void countWordsInFile(const char* fileName, struct Word **head) {
     bool wordExists;
     LINES *lines = lopen(fileName);
     char *line;
@@ -77,25 +84,73 @@ void countWordsInFile(char *fileName) {
         char *word = strtok(line, " \n");
         while (word != NULL) {
             wordExists = false;
-            printf(">>%s<<\n", word);
-            for (int i = 0; i < arrayPos; i++) {
-                if (strcmp(words[i], word) == 0) {
-                    wordCounter[i]++;
+            struct Word *currentWord = *head;
+            while (currentWord != NULL) {
+                if (currentWord->word != NULL && word != NULL && strcmp(currentWord->word, word) == 0) {
+                    currentWord->count++;
                     wordExists = true;
                     break;
                 }
+                currentWord = currentWord->nextWord;
             }
+            // printf(">>%s<<\n", word);
+            // for (int i = 0; i < arrayPos; i++) {
+            //     if (strcmp(words[i], word) == 0) {
+            //         wordCounter[i]++;
+            //         wordExists = true;
+            //         break;
+            //     }
+            // }
             if (!wordExists) {
-                words[arrayPos] = word;
-                wordCounter[arrayPos] = 1;
-                arrayPos++;
+                // if (arrayPos == words)
+                // words[arrayPos] = word;
+                // wordCounter[arrayPos] = 1;
+                // arrayPos++;
+                struct Word *newWord = malloc(sizeof(struct Word));
+                newWord->word = word;
+                newWord->count = 1;
+                newWord->nextWord = NULL;
+                if (*head == NULL) {
+                    *head = newWord;
+                }
+                else {
+                    struct Word *lastWord = *head;
+                    while (lastWord->nextWord != NULL) {
+                        lastWord = lastWord->nextWord;
+                    }
+                    lastWord->nextWord = newWord;
+                }
             }
             word = strtok(NULL, " \n");
         }
 
     }
+    // struct Word *currentWord = head;
+    // while (currentWord != NULL) {
+    //     printf("%s: %d\n", currentWord->word, currentWord->count);
+    //     currentWord = currentWord->nextWord;
+    // }
     free(line);
     lclose(lines);
+}
+
+void printList(struct Word *head) {
+    printf("Head pointer: %p\n", head);
+    struct Word *currentWord = head;
+    while (currentWord != NULL) {
+        printf("%s: %d\n", currentWord->word, currentWord->count);
+        currentWord = currentWord->nextWord;
+    }
+}
+
+void freeList(struct Word *head) {
+    struct Word *currentWord = head;
+    struct Word *nextWord;
+    while (currentWord != NULL) {
+        nextWord = currentWord->nextWord;
+        free(currentWord);
+        currentWord = nextWord;
+    }
 }
 
 // void countWordsInFile(char* filename);
@@ -106,7 +161,7 @@ void countWordsInFile(char *fileName) {
  * @param fullPath Full path of the folder
  * @param level The amount of tabs to append
  */
-void dir(const char* fullPath, int level){
+void dir(const char* fullPath, int level, struct Word **head){
     printf("Reading %s\n", fullPath);
     DIR *dirp = opendir(fullPath);
     int dlen = strlen(fullPath);
@@ -124,11 +179,11 @@ void dir(const char* fullPath, int level){
         switch (type){
             case TYPE_DIR:
                 printf("DIR: %s\n", fname);
-                dir(fname, level+1);
+                dir(fname, level+1, head);
                 break;
             case TYPE_FILE:
                 printf("FILE: %s\n", fname);
-                countWordsInFile(fname);
+                countWordsInFile(fname, head);
                 break;
             default:
                 printf("OTHER: %s\n", fname);
@@ -155,27 +210,28 @@ int main(int argc, char const *argv[])
         printf("please re run with args\n"); 
         return EXIT_FAILURE;
     }
-    initializeArrays();
+    // initializeArrays();
+    struct Word *head = malloc(sizeof(struct Word));
+    head = NULL;
     for(int i = 1; i < argc; i++){
         const char* fname = argv[i];
         int type = isFileOrDir(fname);
         switch (type){
             case TYPE_DIR:
                 printf("DIR: %s\n", fname);
-                dir(fname, 0);
+                dir(fname, 0, &head);
                 break;
             case TYPE_FILE:
                 printf("FILE: %s\n", fname);
-                countWordsInFile(fname);
+                countWordsInFile(fname, &head);
                 break;
             default:
                 printf("OTHER: %s\n", fname);
                 break;
         }
     }
-    for(int i = 0; i < arrayPos; i++){
-        printf("%s: %d\n", words[i], wordCounter[i]);
-    }
+    printList(head);
+    freeList(head);
     return EXIT_SUCCESS;
 }
 

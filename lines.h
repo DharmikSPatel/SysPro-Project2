@@ -11,6 +11,7 @@ typedef struct {
 LINES *lines_fdinit(int fd);
 LINES *lopen(char *path);
 
+
 void lclose(LINES *);
 
 char *get_line(LINES *);
