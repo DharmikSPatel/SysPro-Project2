@@ -75,7 +75,7 @@ int isItSelfOrParrentDirOrHidden(char* name){
     return 0;
 }
 
-void countWordsInFile(const char* fileName, struct Word *head) {
+void countWordsInFile(const char* fileName, struct Word **head) {
     bool wordExists;
     LINES *lines = lopen(fileName);
     char *line;
@@ -84,7 +84,7 @@ void countWordsInFile(const char* fileName, struct Word *head) {
         char *word = strtok(line, " \n");
         while (word != NULL) {
             wordExists = false;
-            struct Word *currentWord = head;
+            struct Word *currentWord = *head;
             while (currentWord != NULL) {
                 if (currentWord->word != NULL && word != NULL && strcmp(currentWord->word, word) == 0) {
                     currentWord->count++;
@@ -110,11 +110,11 @@ void countWordsInFile(const char* fileName, struct Word *head) {
                 newWord->word = word;
                 newWord->count = 1;
                 newWord->nextWord = NULL;
-                if (head == NULL) {
-                    head = newWord;
+                if (*head == NULL) {
+                    *head = newWord;
                 }
                 else {
-                    struct Word *lastWord = head;
+                    struct Word *lastWord = *head;
                     while (lastWord->nextWord != NULL) {
                         lastWord = lastWord->nextWord;
                     }
@@ -161,7 +161,7 @@ void freeList(struct Word *head) {
  * @param fullPath Full path of the folder
  * @param level The amount of tabs to append
  */
-void dir(const char* fullPath, int level, struct Word *head){
+void dir(const char* fullPath, int level, struct Word **head){
     printf("Reading %s\n", fullPath);
     DIR *dirp = opendir(fullPath);
     int dlen = strlen(fullPath);
@@ -219,11 +219,11 @@ int main(int argc, char const *argv[])
         switch (type){
             case TYPE_DIR:
                 printf("DIR: %s\n", fname);
-                dir(fname, 0, head);
+                dir(fname, 0, &head);
                 break;
             case TYPE_FILE:
                 printf("FILE: %s\n", fname);
-                countWordsInFile(fname, head);
+                countWordsInFile(fname, &head);
                 break;
             default:
                 printf("OTHER: %s\n", fname);
