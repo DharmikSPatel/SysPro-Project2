@@ -1,0 +1,65 @@
+Pranay Bhatt: pdb91
+Dharmik Patel: dsp187
+Warrning:
+    - SOMETIMES the compiler might through a warrning if you try to pass in a char* to a const char* or vice versa.
+    - although this is allowed, it will be treated as warning or error based on compiler settings and parrameters.
+Makefile:
+    - Sometimes if the "make" command does not work, or throws errors, then:
+        change "MakeFile" to "MakeFile" or change "Makefile" to "MakeFile"
+    - make words:
+        run this command to make an excutable file called "words"
+        same effect as running just "make" because the "words" recipe is the first
+    - B flag: include -B in any of the cmds above to force rebuild the excutable file
+    - make clean:
+        run this to remove all .o, words(excutable), .dSYM files.
+        use this before commiting/merging with github
+    - Running excutable files: once the excutable files are made, 
+        use ./words to run the excutable file
+
+Overview:
+    - words.c: 
+        Input: this file takes in a list of strings that can be files or folders.
+        Output: prints a list of words, sorted, and with counts.
+
+    - line.c/.h:
+        this is a lib provided by the teacher to read lines from a file
+
+Implementation:
+    - File/Directory Traversal:
+        - the goal is to use the countWordsInFile() func to count words in a file.
+        - PRE_REQ: to call that func, we must check if a file is regular file and ends in ".txt"
+
+        - if its a file, then call countWordsInFile() directly
+        - if its a folder, than it recursilvy opens it and calls countWordsInFile on all valid files
+        - there are helper functions that deal with file types, and if a path is a directory or a file
+    - File Type:
+        - only updates count if a file is a regular file(determined from stat()) and ends in ".txt"
+        - Examples of not acceptable files: *.c, *.java, (a file with no extension)
+    - Data Structure:
+        - we use a Linked List(LL) of struct Word to store all the words from all the files
+        - everytime we find a word token, we loop through the LL and check if it in the LL.
+        - if the word is in the LL, than we update its count.
+        - if the word is not in LL, then we add word to the LL @pranay(front or back, where do u add it)
+    - Sorting:
+        - after all the files are processed, we print the LL in sorted order by
+        - @pranay
+    - struct Word:
+        - this a struct which contains:
+            - char* word
+            - int count: 1 or more int which keeps track of number of occurences
+            - struct Word* nextWord: ptr to next word in LL. Null if nothing after
+    - word token:
+        - to determine what word gets counted in the LL, follow these rules
+        - 4 categories of characters:
+            letters
+            apostrophe
+            hyphen
+            everything else(ie numbers, other puncuation marks, spaces, tabs etc)
+        - letters are always part of a word
+        - apostrophe are only part of a word if they appear in a word. 
+            "a'a", "a'","'a" are all words
+            " ' " is not a word
+        - hyphen (part of a word when between two letters). strictly follow this rule.
+
+Testing:
+    - 
