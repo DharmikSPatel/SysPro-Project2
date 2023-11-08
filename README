@@ -14,7 +14,7 @@ Makefile:
         run this to remove all .o, words(excutable), .dSYM files.
         use this before commiting/merging with github
     - Running excutable files: once the excutable files are made, 
-        use ./words to run the excutable file
+        use ./words [args] to run the excutable file
 
 Overview:
     - words.c: 
