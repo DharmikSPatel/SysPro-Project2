@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <stdbool.h>
+#include <ctype.h>
 #include "lines.h"
 
 
@@ -70,6 +71,36 @@ int fileIsTextFile(char* fileName){
     }
     return 0;
 }
+
+void processWord(char *word, struct Word **head) {
+    bool wordExists = false;
+    struct Word *currentWord = *head;
+    while (currentWord != NULL) {
+        if (currentWord->word != NULL && word != NULL && strcmp(currentWord->word, word) == 0) {
+            currentWord->count++;
+            wordExists = true;
+            break;
+        }
+        currentWord = currentWord->nextWord;
+    }
+    if (!wordExists) {
+        struct Word *newWord = malloc(sizeof(struct Word));
+        newWord->word = word;
+        newWord->count = 1;
+        newWord->nextWord = NULL;
+        if (*head == NULL) {
+            *head = newWord;
+        }
+        else {
+            struct Word *lastWord = *head;
+            while (lastWord->nextWord != NULL) {
+                lastWord = lastWord->nextWord;
+            }
+            lastWord->nextWord = newWord;
+        }
+    }
+}
+
 /**
  * @brief The file must be check by the caller to be a .txt file
  * 
@@ -84,6 +115,37 @@ void countWordsInFile(char* fileName, struct Word **head) {
     while ((line = get_line(lines))) {
         char *word = strtok(line, " \n");
         while (word != NULL) {
+            int len = strlen(word);
+            while (len > 0 && ispunct(word[0])) {
+                word++;
+                len--;
+            }
+            while (len > 0 && ispunct(word[len - 1])) {
+                word[len - 1] = '\0';
+                len--;
+            }
+            // char *digit = strpbrk(word, "0123456789");
+            // if (digit != NULL) {
+            //     *digit = '\0';
+            //     processWord(word, head);
+            //     word = digit + 1;
+            //     continue;
+            // }
+
+            // char *hyphen = strchr(word, '-');
+            // while (hyphen != NULL) {
+            //     if (hyphen > word && isalpha(hyphen[-1]) && isalpha(hyphen[1])) {
+            //         hyphen++; 
+            //     }
+            //     else {
+            //         *hyphen = '\0';
+            //         processWord(word, head);
+            //         word = hyphen + 1;
+            //         continue;
+            //     }
+            //     hyphen = strchr(hyphen, '-');
+            // }
+
             wordExists = false;
             struct Word *currentWord = *head;
             while (currentWord != NULL) {
@@ -110,6 +172,7 @@ void countWordsInFile(char* fileName, struct Word **head) {
                     lastWord->nextWord = newWord;
                 }
             }
+            // processWord(word, head);
             word = strtok(NULL, " \n");
         }
 
@@ -117,6 +180,7 @@ void countWordsInFile(char* fileName, struct Word **head) {
     free(line);
     lclose(lines);
 }
+
 
 void sortList(struct Word *head) {
     // sort the list by count first, then alphabetically
