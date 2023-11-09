@@ -149,8 +149,26 @@ void countWordsInFile(char* fileName, struct Word **head) {
     lclose(lines);
 }
 
+void sortList(struct Word *head) {
+    // sort the list by count first, then alphabetically
+    struct Word *i, *j;
+    for (i = head; i != NULL && i->nextWord != NULL; i = i->nextWord) {
+        for (j = i->nextWord; j != NULL; j = j->nextWord) {
+            if (i->count < j->count || (i->count == j->count && strcmp(i->word, j->word) > 0)) {
+                char *tempWord = i->word;
+                int tempCount = i->count;
+                i->word = j->word;
+                i->count = j->count;
+                j->word = tempWord;
+                j->count = tempCount;
+            }
+        }
+    }
+}
+
 void printList(struct Word *head) {
-    printf("Head pointer: %p\n", head);
+    // printf("Head pointer: %p\n", head);
+    sortList(head);
     struct Word *currentWord = head;
     while (currentWord != NULL) {
         printf("%s: %d\n", currentWord->word, currentWord->count);
