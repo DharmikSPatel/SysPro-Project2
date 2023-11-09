@@ -62,4 +62,32 @@ Implementation:
         - hyphen (part of a word when between two letters). strictly follow this rule.
 
 Testing:
-    - 
+    - We tested our directory traversal and file traversal with the following test case structure:
+
+        - parent directory
+            - subdirectory 1
+                - subdirectory 3
+                    - input5.txt
+
+                - input4.txt
+
+            - subdirectory 2
+            - input2.txt
+            - input3.txt
+
+        - input1.txt
+
+    - Within the files, we tested the following situations:
+        - punctuations:
+            - period/question mark/exclamation after word (doesn't include as part of word)
+            - double quotes (doesn't include as part of word)
+            - apostrophe (includes as part of word)
+        - hyphens:
+            - single hyphen between letters (treated as one word)
+            - single hyphen between letter and nonletter (treated as two words)
+            - multiple hyphens between letters (treated as two words)
+        - word counts:
+            - same word appearing in different files (updates count of word successfully)
+            - words with numbers in-between (separates into two words)
+        - line length:
+            - extremely long line (read successfully)

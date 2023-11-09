@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <stdbool.h>
+#include <ctype.h>
 #include "lines.h"
 
 
@@ -11,25 +12,11 @@
 #define TYPE_DIR 1
 #define TYPE_OTHER -1
 
-// char** words;
-// int* wordCounter;
-// static int arrayPos = 0;
-// static int arraySize = 100;
-
 struct Word {
     char* word;
     int count;
     struct Word* nextWord;
 };
-
-// void initializeArrays() {
-//     words = malloc(sizeof(char*) * 100);
-//     wordCounter = malloc(sizeof(int) * 100);
-//     for (int i = 0; i < 100; i++) {
-//         words[i] = NULL;
-//         wordCounter[i] = 0;
-//     }
-// }
 
 /**
  * @brief This utility function determins if a path is a file, or dir, or neither.
@@ -84,6 +71,36 @@ int fileIsTextFile(char* fileName){
     }
     return 0;
 }
+
+void processWord(char *word, struct Word **head) {
+    bool wordExists = false;
+    struct Word *currentWord = *head;
+    while (currentWord != NULL) {
+        if (currentWord->word != NULL && word != NULL && strcmp(currentWord->word, word) == 0) {
+            currentWord->count++;
+            wordExists = true;
+            break;
+        }
+        currentWord = currentWord->nextWord;
+    }
+    if (!wordExists) {
+        struct Word *newWord = malloc(sizeof(struct Word));
+        newWord->word = word;
+        newWord->count = 1;
+        newWord->nextWord = NULL;
+        if (*head == NULL) {
+            *head = newWord;
+        }
+        else {
+            struct Word *lastWord = *head;
+            while (lastWord->nextWord != NULL) {
+                lastWord = lastWord->nextWord;
+            }
+            lastWord->nextWord = newWord;
+        }
+    }
+}
+
 /**
  * @brief The file must be check by the caller to be a .txt file
  * 
@@ -98,6 +115,37 @@ void countWordsInFile(char* fileName, struct Word **head) {
     while ((line = get_line(lines))) {
         char *word = strtok(line, " \n");
         while (word != NULL) {
+            int len = strlen(word);
+            while (len > 0 && ispunct(word[0])) {
+                word++;
+                len--;
+            }
+            while (len > 0 && ispunct(word[len - 1])) {
+                word[len - 1] = '\0';
+                len--;
+            }
+            // char *digit = strpbrk(word, "0123456789");
+            // if (digit != NULL) {
+            //     *digit = '\0';
+            //     processWord(word, head);
+            //     word = digit + 1;
+            //     continue;
+            // }
+
+            // char *hyphen = strchr(word, '-');
+            // while (hyphen != NULL) {
+            //     if (hyphen > word && isalpha(hyphen[-1]) && isalpha(hyphen[1])) {
+            //         hyphen++; 
+            //     }
+            //     else {
+            //         *hyphen = '\0';
+            //         processWord(word, head);
+            //         word = hyphen + 1;
+            //         continue;
+            //     }
+            //     hyphen = strchr(hyphen, '-');
+            // }
+
             wordExists = false;
             struct Word *currentWord = *head;
             while (currentWord != NULL) {
@@ -108,19 +156,7 @@ void countWordsInFile(char* fileName, struct Word **head) {
                 }
                 currentWord = currentWord->nextWord;
             }
-            // printf(">>%s<<\n", word);
-            // for (int i = 0; i < arrayPos; i++) {
-            //     if (strcmp(words[i], word) == 0) {
-            //         wordCounter[i]++;
-            //         wordExists = true;
-            //         break;
-            //     }
-            // }
             if (!wordExists) {
-                // if (arrayPos == words)
-                // words[arrayPos] = word;
-                // wordCounter[arrayPos] = 1;
-                // arrayPos++;
                 struct Word *newWord = malloc(sizeof(struct Word));
                 newWord->word = word;
                 newWord->count = 1;
@@ -136,21 +172,35 @@ void countWordsInFile(char* fileName, struct Word **head) {
                     lastWord->nextWord = newWord;
                 }
             }
+            // processWord(word, head);
             word = strtok(NULL, " \n");
         }
 
     }
-    // struct Word *currentWord = head;
-    // while (currentWord != NULL) {
-    //     printf("%s: %d\n", currentWord->word, currentWord->count);
-    //     currentWord = currentWord->nextWord;
-    // }
     free(line);
     lclose(lines);
 }
 
+
+void sortList(struct Word *head) {
+    // sort the list by count first, then alphabetically
+    struct Word *i, *j;
+    for (i = head; i != NULL && i->nextWord != NULL; i = i->nextWord) {
+        for (j = i->nextWord; j != NULL; j = j->nextWord) {
+            if (i->count < j->count || (i->count == j->count && strcmp(i->word, j->word) > 0)) {
+                char *tempWord = i->word;
+                int tempCount = i->count;
+                i->word = j->word;
+                i->count = j->count;
+                j->word = tempWord;
+                j->count = tempCount;
+            }
+        }
+    }
+}
+
 void printList(struct Word *head) {
-    printf("Head pointer: %p\n", head);
+    sortList(head);
     struct Word *currentWord = head;
     while (currentWord != NULL) {
         printf("%s: %d\n", currentWord->word, currentWord->count);
