@@ -11,25 +11,11 @@
 #define TYPE_DIR 1
 #define TYPE_OTHER -1
 
-// char** words;
-// int* wordCounter;
-// static int arrayPos = 0;
-// static int arraySize = 100;
-
 struct Word {
     char* word;
     int count;
     struct Word* nextWord;
 };
-
-// void initializeArrays() {
-//     words = malloc(sizeof(char*) * 100);
-//     wordCounter = malloc(sizeof(int) * 100);
-//     for (int i = 0; i < 100; i++) {
-//         words[i] = NULL;
-//         wordCounter[i] = 0;
-//     }
-// }
 
 /**
  * @brief This utility function determins if a path is a file, or dir, or neither.
@@ -108,19 +94,7 @@ void countWordsInFile(char* fileName, struct Word **head) {
                 }
                 currentWord = currentWord->nextWord;
             }
-            // printf(">>%s<<\n", word);
-            // for (int i = 0; i < arrayPos; i++) {
-            //     if (strcmp(words[i], word) == 0) {
-            //         wordCounter[i]++;
-            //         wordExists = true;
-            //         break;
-            //     }
-            // }
             if (!wordExists) {
-                // if (arrayPos == words)
-                // words[arrayPos] = word;
-                // wordCounter[arrayPos] = 1;
-                // arrayPos++;
                 struct Word *newWord = malloc(sizeof(struct Word));
                 newWord->word = word;
                 newWord->count = 1;
@@ -140,11 +114,6 @@ void countWordsInFile(char* fileName, struct Word **head) {
         }
 
     }
-    // struct Word *currentWord = head;
-    // while (currentWord != NULL) {
-    //     printf("%s: %d\n", currentWord->word, currentWord->count);
-    //     currentWord = currentWord->nextWord;
-    // }
     free(line);
     lclose(lines);
 }
@@ -167,7 +136,6 @@ void sortList(struct Word *head) {
 }
 
 void printList(struct Word *head) {
-    // printf("Head pointer: %p\n", head);
     sortList(head);
     struct Word *currentWord = head;
     while (currentWord != NULL) {
