@@ -113,17 +113,17 @@ void countWordsInFile(char* fileName, struct Word **head) {
     char *line;
 
     while ((line = get_line(lines))) {
-        char *word = strtok(line, " \n");
+        char *word = strtok(line, " 0123456789.,?!\"\n");
         while (word != NULL) {
-            int len = strlen(word);
-            while (len > 0 && ispunct(word[0])) {
-                word++;
-                len--;
-            }
-            while (len > 0 && ispunct(word[len - 1])) {
-                word[len - 1] = '\0';
-                len--;
-            }
+            // int len = strlen(word);
+            // while (len > 0 && ispunct(word[0])) {
+            //     word++;
+            //     len--;
+            // }
+            // while (len > 0 && ispunct(word[len - 1])) {
+            //     word[len - 1] = '\0';
+            //     len--;
+            // }
             // char *digit = strpbrk(word, "0123456789");
             // if (digit != NULL) {
             //     *digit = '\0';
@@ -173,7 +173,7 @@ void countWordsInFile(char* fileName, struct Word **head) {
                 }
             }
             // processWord(word, head);
-            word = strtok(NULL, " \n");
+            word = strtok(NULL, " 0123456789.,?!\"\n");
         }
 
     }
