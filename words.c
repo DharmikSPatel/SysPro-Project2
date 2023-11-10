@@ -159,14 +159,14 @@ void countWordsInFile(char* fileName) {
         for (size_t i = 0; i < strlen(line); i++){
             currChar = line[i];
             nextChar = line[i+1];
-            if(!isalpha(currChar)){
-                if(currChar == '\''){
-                    if(!isAlphaOrApos(prevChar) && !isAlphaOrApos(nextChar)){
-                        addWord(line, currWordStart, i);
-                        currWordStart = i+1;
-                    }
-                }
-                else if(currChar == '-'){
+            if(!isAlphaOrApos(currChar)){
+                // if(currChar == '\''){
+                //     if(!isAlphaOrApos(prevChar) && !isAlphaOrApos(nextChar)){
+                //         addWord(line, currWordStart, i);
+                //         currWordStart = i+1;
+                //     }
+                // }
+                if(currChar == '-'){
                     if(!(isalpha(prevChar) && isalpha(nextChar))){
                         addWord(line, currWordStart, i);
                         currWordStart = i+1;
@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
                 break;
             case TYPE_FILE:
                 //printf("FILE: %s\n", fname);
-                if(fileIsTextFile(fname))
+                //if(fileIsTextFile(fname))
                     countWordsInFile(fname);
                 break;
             default:

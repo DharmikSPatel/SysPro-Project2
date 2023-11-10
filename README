@@ -56,9 +56,8 @@ Implementation:
             hyphen
             everything else(ie numbers, other puncuation marks, spaces, tabs etc)
         - letters are always part of a word
-        - apostrophe are only part of a word if they appear in a word. 
+        - apostrophe are only part of a word if they appear in a word. Treat like letters, unlese '-' is involed
             "a'a", "a'","'a" are all words
-            " ' " is not a word
         - hyphen (part of a word when between two letters). strictly follow this rule.
 
 Testing:
@@ -77,6 +76,7 @@ Testing:
             - input3.txt
 
         - input1.txt
+        - words.c (to test other files types in parrent dir)
 
     - Within the files, we tested the following situations:
         - punctuations:
