@@ -137,6 +137,9 @@ void addWord(char* line, int startIndex, int endIndex){
     wordLL = word;
 }
 
+int isAlphaOrApos(char c){
+    return isalpha(c) || c == '\'';
+}
 
 /**
  * @brief The file must be check by the caller to be a .txt file
@@ -158,7 +161,7 @@ void countWordsInFile(char* fileName) {
             nextChar = line[i+1];
             if(!isalpha(currChar)){
                 if(currChar == '\''){
-                    if(!isalpha(prevChar) && !isalpha(nextChar)){
+                    if(!isAlphaOrApos(prevChar) && !isAlphaOrApos(nextChar)){
                         addWord(line, currWordStart, i);
                         currWordStart = i+1;
                     }
