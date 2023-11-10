@@ -61,15 +61,15 @@ int isFileOrDir(const char* fullFilePath){
     }
     return TYPE_OTHER;
 }
-/**
- * @brief Prints \t a giving amount of times. Used to visulaize directory structure
- * 
- * @param levels the number of \t to append
- */
-void printTabs(int levels){
-    for(int i = 0; i < levels; i++)
-        printf("\t");
-}
+// /**
+//  * @brief Prints \t a giving amount of times. Used to visulaize directory structure
+//  * 
+//  * @param levels the number of \t to append
+//  */
+// void printTabs(int levels){
+//     for(int i = 0; i < levels; i++)
+//         printf("\t");
+// }
 
 /**
  * @brief This utility function checks if a directory entry is . or .. or hiden(starts with .)
@@ -213,7 +213,7 @@ void dir(const char* fullPath, int level){
         fname[dlen] = '/';
         memcpy(fname + dlen + 1, de->d_name, flen + 1);
         int type = isFileOrDir(fname);
-        printTabs(level);
+        //printTabs(level);
 
         switch (type){
             case TYPE_DIR:
