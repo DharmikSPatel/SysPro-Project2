@@ -115,36 +115,7 @@ void countWordsInFile(char* fileName, struct Word **head) {
     while ((line = get_line(lines))) {
         char *word = strtok(line, " 0123456789.,?!\"\n");
         while (word != NULL) {
-            // int len = strlen(word);
-            // while (len > 0 && ispunct(word[0])) {
-            //     word++;
-            //     len--;
-            // }
-            // while (len > 0 && ispunct(word[len - 1])) {
-            //     word[len - 1] = '\0';
-            //     len--;
-            // }
-            // char *digit = strpbrk(word, "0123456789");
-            // if (digit != NULL) {
-            //     *digit = '\0';
-            //     processWord(word, head);
-            //     word = digit + 1;
-            //     continue;
-            // }
-
-            // char *hyphen = strchr(word, '-');
-            // while (hyphen != NULL) {
-            //     if (hyphen > word && isalpha(hyphen[-1]) && isalpha(hyphen[1])) {
-            //         hyphen++; 
-            //     }
-            //     else {
-            //         *hyphen = '\0';
-            //         processWord(word, head);
-            //         word = hyphen + 1;
-            //         continue;
-            //     }
-            //     hyphen = strchr(hyphen, '-');
-            // }
+            
 
             wordExists = false;
             struct Word *currentWord = *head;

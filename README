@@ -67,11 +67,12 @@ Testing:
         - parent directory
             - subdirectory 1
                 - subdirectory 3
-                    - input5.txt
+                    - input6.txt
 
                 - input4.txt
 
             - subdirectory 2
+                - input5.txt
             - input2.txt
             - input3.txt
 
@@ -88,6 +89,6 @@ Testing:
             - multiple hyphens between letters (treated as two words)
         - word counts:
             - same word appearing in different files (updates count of word successfully)
-            - words with numbers in-between (separates into two words)
+            - words with numbers in the middle (separates into two words)
         - line length:
             - extremely long line (read successfully)
