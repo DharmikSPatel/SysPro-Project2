@@ -36,18 +36,18 @@ Implementation:
         - only updates count if a file is a regular file(determined from stat()) and ends in ".txt"
         - Examples of not acceptable files: *.c, *.java, (a file with no extension)
     - Data Structure:
-        - we use a Linked List(LL) of struct Word to store all the words from all the files
+        - we use a Linked List(LL) of Word to store all the words from all the files
         - everytime we find a word token, we loop through the LL and check if it in the LL.
         - if the word is in the LL, than we update its count.
         - if the word is not in LL, then we add word to the LL @pranay(front or back, where do u add it)
     - Sorting:
         - after all the files are processed, we print the LL in sorted order by
         - @pranay
-    - struct Word:
+    - Word:
         - this a struct which contains:
             - char* word
             - int count: 1 or more int which keeps track of number of occurences
-            - struct Word* nextWord: ptr to next word in LL. Null if nothing after
+            - Word* nextWord: ptr to next word in LL. Null if nothing after
     - word token:
         - to determine what word gets counted in the LL, follow these rules
         - 4 categories of characters:

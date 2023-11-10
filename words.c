@@ -11,13 +11,40 @@
 #define TYPE_FILE 0
 #define TYPE_DIR 1
 #define TYPE_OTHER -1
+#define EMPTY '\0'
 
-struct Word {
+typedef struct Word {
     char* word;
     int count;
     struct Word* nextWord;
-};
+} Word;
 
+Word *wordLL = NULL;
+
+void sortList() {
+    // sort the list by count first, then alphabetically
+    Word *i, *j;
+    for (i = wordLL; i != NULL && i->nextWord != NULL; i = i->nextWord) {
+        for (j = i->nextWord; j != NULL; j = j->nextWord) {
+            if (i->count < j->count || (i->count == j->count && strcmp(i->word, j->word) > 0)) {
+                char *tempWord = i->word;
+                int tempCount = i->count;
+                i->word = j->word;
+                i->count = j->count;
+                j->word = tempWord;
+                j->count = tempCount;
+            }
+        }
+    }
+}
+void printList() {
+    sortList();
+    Word *currentWord = wordLL;
+    while (currentWord != NULL) {
+        printf("%s: %d\n", currentWord->word, currentWord->count);
+        currentWord = currentWord->nextWord;
+    }
+}
 /**
  * @brief This utility function determins if a path is a file, or dir, or neither.
  * 
@@ -34,15 +61,15 @@ int isFileOrDir(const char* fullFilePath){
     }
     return TYPE_OTHER;
 }
-/**
- * @brief Prints \t a giving amount of times. Used to visulaize directory structure
- * 
- * @param levels the number of \t to append
- */
-void printTabs(int levels){
-    for(int i = 0; i < levels; i++)
-        printf("\t");
-}
+// /**
+//  * @brief Prints \t a giving amount of times. Used to visulaize directory structure
+//  * 
+//  * @param levels the number of \t to append
+//  */
+// void printTabs(int levels){
+//     for(int i = 0; i < levels; i++)
+//         printf("\t");
+// }
 
 /**
  * @brief This utility function checks if a directory entry is . or .. or hiden(starts with .)
@@ -64,141 +91,114 @@ int isItSelfOrParrentDirOrHidden(char* name){
 int fileIsTextFile(char* fileName){
     int len = strlen(fileName);
     if(len >= 4){
-        //printf("%s\n", &(fileName[len - 4]));
         if(strcmp(&(fileName[len - 4]), ".txt") == 0){
             return 1;
         }
     }
     return 0;
 }
-
-void processWord(char *word, struct Word **head) {
-    bool wordExists = false;
-    struct Word *currentWord = *head;
-    while (currentWord != NULL) {
-        if (currentWord->word != NULL && word != NULL && strcmp(currentWord->word, word) == 0) {
-            currentWord->count++;
-            wordExists = true;
-            break;
-        }
-        currentWord = currentWord->nextWord;
+void addWord(char* line, int startIndex, int endIndex){
+    if(startIndex == endIndex) return;
+    int lword = endIndex - startIndex + 1;
+    char* newWord = malloc(lword);
+    memcpy(newWord, line + startIndex, lword);
+    newWord[lword - 1] = '\0';
+    if(wordLL == NULL){
+        wordLL = malloc(sizeof(Word));
+        wordLL->word = newWord;
+        wordLL->count = 1;
+        wordLL->nextWord = NULL;
+        return;
     }
-    if (!wordExists) {
-        struct Word *newWord = malloc(sizeof(struct Word));
-        newWord->word = word;
-        newWord->count = 1;
-        newWord->nextWord = NULL;
-        if (*head == NULL) {
-            *head = newWord;
-        }
-        else {
-            struct Word *lastWord = *head;
-            while (lastWord->nextWord != NULL) {
-                lastWord = lastWord->nextWord;
+    else{
+        Word *currWord = wordLL;
+        while(currWord != NULL){
+            if(strcmp(newWord, currWord->word) == 0){
+                currWord->count += 1;
+                return;
             }
-            lastWord->nextWord = newWord;
+            currWord = currWord->nextWord; 
         }
     }
+    
+    Word *currWord = wordLL;
+    while(currWord != NULL){
+        if(strcmp(newWord, currWord->word) == 0){
+            currWord->count += 1;
+            return;
+        }
+        currWord = currWord->nextWord; 
+    }
+
+    Word *word = malloc(sizeof(Word));
+    word->word = newWord;
+    word->count = 1;
+    word->nextWord = wordLL;
+    wordLL = word;
 }
+
 
 /**
  * @brief The file must be check by the caller to be a .txt file
  * 
  * @param fileName the name of a .txt file
- * @param head 
+ * @param wordLL 
  */
-void countWordsInFile(char* fileName, struct Word **head) {
-    bool wordExists;
+void countWordsInFile(char* fileName) {
     LINES *lines = lopen(fileName);
     char *line;
 
     while ((line = get_line(lines))) {
-        char *word = strtok(line, " 0123456789.,?!\"\n");
-        while (word != NULL) {
-            
-
-            wordExists = false;
-            struct Word *currentWord = *head;
-            while (currentWord != NULL) {
-                if (currentWord->word != NULL && word != NULL && strcmp(currentWord->word, word) == 0) {
-                    currentWord->count++;
-                    wordExists = true;
-                    break;
-                }
-                currentWord = currentWord->nextWord;
-            }
-            if (!wordExists) {
-                struct Word *newWord = malloc(sizeof(struct Word));
-                newWord->word = word;
-                newWord->count = 1;
-                newWord->nextWord = NULL;
-                if (*head == NULL) {
-                    *head = newWord;
-                }
-                else {
-                    struct Word *lastWord = *head;
-                    while (lastWord->nextWord != NULL) {
-                        lastWord = lastWord->nextWord;
+        char prevChar = EMPTY;
+        char currChar = EMPTY;
+        char nextChar = EMPTY;
+        int currWordStart = 0;
+        for (size_t i = 0; i < strlen(line); i++){
+            currChar = line[i];
+            nextChar = line[i+1];
+            if(!isalpha(currChar)){
+                if(currChar == '\''){
+                    if(!isalpha(prevChar) && !isalpha(nextChar)){
+                        addWord(line, currWordStart, i);
+                        currWordStart = i+1;
                     }
-                    lastWord->nextWord = newWord;
+                }
+                else if(currChar == '-'){
+                    if(!(isalpha(prevChar) && isalpha(nextChar))){
+                        addWord(line, currWordStart, i);
+                        currWordStart = i+1;
+                    }
+                }
+                else{
+                    addWord(line, currWordStart, i);
+                    currWordStart = i+1;
                 }
             }
-            // processWord(word, head);
-            word = strtok(NULL, " 0123456789.,?!\"\n");
+            prevChar = currChar;
         }
-
+        if(currWordStart < strlen(line)){
+            addWord(line, currWordStart, strlen(line));
+        }
     }
     free(line);
     lclose(lines);
 }
-
-
-void sortList(struct Word *head) {
-    // sort the list by count first, then alphabetically
-    struct Word *i, *j;
-    for (i = head; i != NULL && i->nextWord != NULL; i = i->nextWord) {
-        for (j = i->nextWord; j != NULL; j = j->nextWord) {
-            if (i->count < j->count || (i->count == j->count && strcmp(i->word, j->word) > 0)) {
-                char *tempWord = i->word;
-                int tempCount = i->count;
-                i->word = j->word;
-                i->count = j->count;
-                j->word = tempWord;
-                j->count = tempCount;
-            }
-        }
-    }
-}
-
-void printList(struct Word *head) {
-    sortList(head);
-    struct Word *currentWord = head;
-    while (currentWord != NULL) {
-        printf("%s: %d\n", currentWord->word, currentWord->count);
-        currentWord = currentWord->nextWord;
-    }
-}
-
-void freeList(struct Word *head) {
-    struct Word *currentWord = head;
-    struct Word *nextWord;
+void freeList() {
+    Word *currentWord = wordLL;
+    Word *nextWord;
     while (currentWord != NULL) {
         nextWord = currentWord->nextWord;
         free(currentWord);
         currentWord = nextWord;
     }
 }
-
-// void countWordsInFile(char* filename);
-
 /**
  * @brief This function recursivly opens and reads from a directory
  * 
  * @param fullPath Full path of the folder
  * @param level The amount of tabs to append
  */
-void dir(const char* fullPath, int level, struct Word **head){
-    printf("Reading %s\n", fullPath);
+void dir(const char* fullPath, int level){
     DIR *dirp = opendir(fullPath);
     int dlen = strlen(fullPath);
     struct dirent *de;
@@ -213,20 +213,20 @@ void dir(const char* fullPath, int level, struct Word **head){
         fname[dlen] = '/';
         memcpy(fname + dlen + 1, de->d_name, flen + 1);
         int type = isFileOrDir(fname);
-        printTabs(level);
+        //printTabs(level);
 
         switch (type){
             case TYPE_DIR:
-                printf("DIR: %s\n", fname);
-                dir(fname, level+1, head);
+                //printf("DIR: %s\n", fname);
+                dir(fname, level+1);
                 break;
             case TYPE_FILE:
-                printf("FILE: %s\n", fname);
+                //printf("FILE: %s\n", fname);
                 if(fileIsTextFile(fname))
-                    countWordsInFile(fname, head);
+                    countWordsInFile(fname);
                 break;
             default:
-                printf("OTHER: %s\n", fname);
+                //printf("OTHER: %s\n", fname);
                 break;
         }
         free(fname);
@@ -246,33 +246,33 @@ void dir(const char* fullPath, int level, struct Word **head){
  */
 int main(int argc, char *argv[])
 {
-    if(argc <= 0) {
+    if(argc <= 1) {
         printf("please re run with args\n"); 
         return EXIT_FAILURE;
     }
     // initializeArrays();
-    struct Word *head = malloc(sizeof(struct Word));
-    head = NULL;
+    // wordLL = malloc(sizeof(Word));
+    // wordLL = NULL;
     for(int i = 1; i < argc; i++){
         char* fname = argv[i];
         int type = isFileOrDir(fname);
         switch (type){
             case TYPE_DIR:
-                printf("DIR: %s\n", fname);
-                dir(fname, 0, &head);
+                //printf("DIR: %s\n", fname);
+                dir(fname, 0);
                 break;
             case TYPE_FILE:
-                printf("FILE: %s\n", fname);
+                //printf("FILE: %s\n", fname);
                 if(fileIsTextFile(fname))
-                    countWordsInFile(fname, &head);
+                    countWordsInFile(fname);
                 break;
             default:
-                printf("OTHER: %s\n", fname);
+                //printf("OTHER: %s\n", fname);
                 break;
         }
     }
-    printList(head);
-    freeList(head);
+    printList();
+    freeList();
     return EXIT_SUCCESS;
 }
 
