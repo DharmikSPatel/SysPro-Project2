@@ -115,6 +115,7 @@ void addWord(char* line, int startIndex, int endIndex){
         while(currWord != NULL){
             if(strcmp(newWord, currWord->word) == 0){
                 currWord->count += 1;
+                free(newWord);
                 return;
             }
             currWord = currWord->nextWord; 
@@ -123,10 +124,11 @@ void addWord(char* line, int startIndex, int endIndex){
     
     Word *currWord = wordLL;
     while(currWord != NULL){
-        if(strcmp(newWord, currWord->word) == 0){
-            currWord->count += 1;
-            return;
-        }
+        // if(strcmp(newWord, currWord->word) == 0){
+        //     currWord->count += 1;
+        //     free(newWord);
+        //     return;
+        // }
         currWord = currWord->nextWord; 
     }
 
@@ -135,6 +137,7 @@ void addWord(char* line, int startIndex, int endIndex){
     word->count = 1;
     word->nextWord = wordLL;
     wordLL = word;
+
 }
 
 int isAlphaOrApos(char c){
@@ -181,9 +184,10 @@ void countWordsInFile(char* fileName) {
         }
         if(currWordStart < strlen(line)){
             addWord(line, currWordStart, strlen(line));
-        }
+        }  
+        free(line);
     }
-    free(line);
+    // free(line);
     lclose(lines);
 }
 void freeList() {
@@ -191,6 +195,7 @@ void freeList() {
     Word *nextWord;
     while (currentWord != NULL) {
         nextWord = currentWord->nextWord;
+        free(currentWord->word);
         free(currentWord);
         currentWord = nextWord;
     }
